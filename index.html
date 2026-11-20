@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Counter Bill</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f6f54">
+<style>
+:root{
+  --bg:#f3efe6;--surface:#fffdf8;--ink:#2a2118;--muted:#7a6c5c;--line:#ddd3c0;
+  --item:#fff4dc;--item-hover:#ffe8b5;--accent:#1f6f54;--accent-ink:#fff;--warn:#b3261e;--cash:#e9efe4;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#1d1913;--surface:#27221a;--ink:#f1e9da;--muted:#a79880;--line:#40382b;
+  --item:#3a3020;--item-hover:#4d3f27;--accent:#4fb58f;--accent-ink:#10231b;--warn:#ff8a80;--cash:#2c3326;}
+}
+:root[data-theme="dark"]{--bg:#1d1913;--surface:#27221a;--ink:#f1e9da;--muted:#a79880;--line:#40382b;
+  --item:#3a3020;--item-hover:#4d3f27;--accent:#4fb58f;--accent-ink:#10231b;--warn:#ff8a80;--cash:#2c3326;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+.app{max-width:1000px;margin:0 auto;padding:14px;display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:800px){.app{grid-template-columns:1.1fr 1fr;align-items:start}}
+h2{font-size:15px;margin:0 0 10px;color:var(--muted);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.item{background:var(--item);border:1px solid var(--line);border-radius:12px;padding:14px 8px;color:var(--ink);font:inherit;cursor:pointer;text-align:center;min-height:78px;touch-action:manipulation;transition:transform .08s}
+.item:active{transform:scale(.95);background:var(--item-hover)}
+.item b{display:block;font-size:16px;margin-bottom:4px}
+.item span{color:var(--muted);font-size:14px}
+.lines{list-style:none;margin:0;padding:0;min-height:60px}
+.lines li{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.lines .empty{color:var(--muted);display:block;border:0;padding:14px 0}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;cursor:pointer}
+.amt{min-width:70px;text-align:right;font-variant-numeric:tabular-nums}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;font-size:20px;font-weight:700}
+.total output{font-size:30px;font-variant-numeric:tabular-nums}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.note{background:var(--cash);border:1px solid var(--line);border-radius:10px;padding:12px 4px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer;touch-action:manipulation}
+.note:active{transform:scale(.95)}
+.row{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.result{margin-top:12px;padding:14px;border-radius:12px;background:var(--cash);display:grid;gap:6px}
+.result div{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.change{font-size:22px;font-weight:700}
+.change.short{color:var(--warn)}
+.change.ok{color:var(--accent)}
+.head{display:flex;justify-content:space-between;align-items:center}
+.head .btn{flex:none;padding:6px 12px;font-size:13px}
+.item{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.item.lift{position:relative;z-index:5;transition:none;box-shadow:0 8px 20px rgba(0,0,0,.3);border-color:var(--accent)}
+html,body{height:100%;overflow:hidden}
+.app{height:100%;display:flex;flex-direction:column;gap:8px;padding:8px}
+.app>div{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.app>div>section:first-child{flex:1;min-height:0;display:flex;flex-direction:column}
+.panel{padding:10px;border-radius:12px}
+h2{font-size:13px;margin:0 0 6px}
+.menu{grid-template-columns:repeat(3,1fr);gap:8px}
+.item{min-height:54px;padding:8px 4px}
+.item b{font-size:15px;margin-bottom:2px}
+.item span{font-size:13px}
+.lines{flex:1;overflow-y:auto;min-height:0}
+.lines li{padding:5px 0}
+.total{margin-top:6px;font-size:17px}
+.total output{font-size:24px}
+.notes{grid-template-columns:repeat(5,1fr);gap:6px}
+.note{padding:9px 2px}
+.row{gap:6px;margin-top:6px}
+.btn{padding:9px 4px;font-size:14px}
+.result{margin-top:6px;padding:8px 12px;gap:2px}
+.change{font-size:20px}
+@media(min-width:800px){.app{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}}
+.item{position:relative}
+.badge{position:absolute;top:-6px;right:-6px;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-style:normal;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.badge[hidden]{display:none}
+.item.picked{border-color:var(--accent)}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="panel" aria-label="Menu">
+    <h2 id="menuTitle">Menu: tap to add, touch and hold to move</h2>
+    <div class="menu" id="menu"></div>
+  </section>
+
+  <div style="display:grid;gap:14px">
+    <section class="panel" aria-label="Order">
+      <div class="head"><h2>Current order</h2><button class="btn" id="clear">Clear order</button></div>
+      <ul class="lines" id="lines"></ul>
+      <div class="total"><span>Total</span><output id="total">0.00</output></div>
+    </section>
+
+    <section class="panel" aria-label="Payment">
+      <h2>Cash received: tap notes</h2>
+      <div class="notes" id="notes"></div>
+      <div class="row">
+        <button class="btn" id="exact">Exact amount</button>
+        <button class="btn" id="resetCash">Reset cash</button>
+        <button class="btn primary" id="done">New order</button>
+      </div>
+      <div class="result" aria-live="polite">
+        <div><span>Received</span><span id="rRecv">0.00</span></div>
+        <div class="change" id="rChange"><span id="rLabel">Return to customer</span><span id="rAmt">0.00</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+// Edit these to match your restaurant.
+var CURRENCY = "₹";
+var MENU = [
+  {n:"Lukhmi",p:25},{n:"Samosa",p:20},{n:"Khajur",p:25},
+  {n:"Full Chai",p:25},{n:"Single Chai",p:15},{n:"Biscuit",p:5},
+  {n:"Water 10",p:10},{n:"Water 20",p:20}
+];
+var DENOMS = [500,200,100,50,20,10,5,2,1];
+
+var order = {}, received = 0;
+var $ = function(id){return document.getElementById(id)};
+var fmt = function(x){return (Math.round(x*100)/100).toFixed(2)};
+
+var seq = MENU.map(function(_,i){return i});
+try{
+  var saved = JSON.parse(localStorage.getItem("menuSeq")||"null");
+  if(saved && saved.length<=MENU.length && new Set(saved).size===saved.length &&
+     saved.every(function(i){return i>=0 && i<MENU.length})){
+    seq = saved;
+    for(var j=0;j<MENU.length;j++) if(seq.indexOf(j)<0) seq.push(j);
+  }
+}catch(e){}
+
+var menuBox = $("menu"), st = null, justDragged = false;
+
+function renderMenu(){
+  menuBox.innerHTML = "";
+  seq.forEach(function(i){
+    var m = MENU[i];
+    var b = document.createElement("button");
+    b.className = "item"; b.dataset.i = i;
+    b.innerHTML = "<b></b><span></span><i class='badge' hidden></i>";
+    b.querySelector("b").textContent = m.n;
+    b.querySelector("span").textContent = CURRENCY + fmt(m.p);
+    b.onclick = function(){ if(justDragged) return; order[i] = (order[i]||0) + 1; render(); };
+    b.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+    b.addEventListener("pointerdown", function(e){
+      if(e.pointerType==="mouse" && e.button!==0) return;
+      st = {b:b, x:e.clientX, y:e.clientY, id:e.pointerId, dragging:false};
+      st.timer = setTimeout(function(){
+        if(!st) return;
+        st.dragging = true; b.classList.add("lift");
+        try{ navigator.vibrate(25); }catch(err){}
+        place(b, {clientX:st.x, clientY:st.y});
+      }, 450);
+    });
+    menuBox.appendChild(b);
+  });
+}
+
+function place(b,e){
+  b.style.transform = "none";
+  var r = b.getBoundingClientRect();
+  b.style.transform = "translate(" + (e.clientX-r.left-r.width/2) + "px," + (e.clientY-r.top-r.height/2) + "px) scale(1.06)";
+}
+
+document.addEventListener("pointermove", function(e){
+  if(!st || e.pointerId!==st.id) return;
+  if(!st.dragging){
+    if(Math.abs(e.clientX-st.x)>10 || Math.abs(e.clientY-st.y)>10){ clearTimeout(st.timer); st = null; }
+    return;
+  }
+  var b = st.b, kids = menuBox.children;
+  for(var k=0;k<kids.length;k++){
+    var o = kids[k]; if(o===b) continue;
+    var r = o.getBoundingClientRect();
+    if(e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom){
+      var after = Array.prototype.indexOf.call(kids,b) < k;
+      menuBox.insertBefore(b, after ? o.nextSibling : o);
+      break;
+    }
+  }
+  place(b,e);
+});
+
+function endPress(){
+  if(!st) return;
+  clearTimeout(st.timer);
+  var s = st; st = null;
+  if(s.dragging){
+    s.b.classList.remove("lift"); s.b.style.transform = "";
+    seq = Array.prototype.map.call(menuBox.children, function(el){ return +el.dataset.i; });
+    try{ localStorage.setItem("menuSeq", JSON.stringify(seq)); }catch(err){}
+    justDragged = true; setTimeout(function(){ justDragged = false; }, 100);
+  }
+}
+document.addEventListener("pointerdown", function(e){
+  if(e.target.closest && e.target.closest("button")){ try{ navigator.vibrate(12); }catch(err){} }
+});
+document.addEventListener("pointerup", endPress);
+document.addEventListener("pointercancel", endPress);
+document.addEventListener("touchmove", function(e){ if(st && st.dragging) e.preventDefault(); }, {passive:false});
+renderMenu();
+
+DENOMS.forEach(function(d){
+  var b = document.createElement("button");
+  b.className = "note";
+  b.textContent = CURRENCY + d;
+  b.onclick = function(){ received += d; render(); };
+  $("notes").appendChild(b);
+});
+
+function total(){
+  return Object.keys(order).reduce(function(s,i){return s + MENU[i].p*order[i]},0);
+}
+
+function render(){
+  var ul = $("lines"); ul.innerHTML = "";
+  var keys = Object.keys(order);
+  if(!keys.length){
+    var e = document.createElement("li"); e.className = "empty";
+    e.textContent = "No items yet. Tap a menu button to start."; ul.appendChild(e);
+  }
+  keys.forEach(function(i){
+    var li = document.createElement("li");
+    var name = document.createElement("span"); name.textContent = MENU[i].n;
+    var q = document.createElement("div"); q.className = "qty";
+    var minus = document.createElement("button"); minus.textContent = "−"; minus.setAttribute("aria-label","Remove one "+MENU[i].n);
+    var n = document.createElement("span"); n.textContent = order[i];
+    var plus = document.createElement("button"); plus.textContent = "+"; plus.setAttribute("aria-label","Add one "+MENU[i].n);
+    minus.onclick = function(){ order[i]--; if(order[i]<=0) delete order[i]; render(); };
+    plus.onclick = function(){ order[i]++; render(); };
+    q.append(minus,n,plus);
+    var a = document.createElement("span"); a.className = "amt"; a.textContent = fmt(MENU[i].p*order[i]);
+    li.append(name,q,a); ul.appendChild(li);
+  });
+  var t = total();
+  Array.prototype.forEach.call(menuBox.children, function(el){
+    var n = order[el.dataset.i] || 0, bd = el.querySelector(".badge");
+    bd.hidden = !n; bd.textContent = n; el.classList.toggle("picked", n > 0);
+  });
+  $("total").textContent = CURRENCY + fmt(t);
+  $("rRecv").textContent = fmt(received);
+  var diff = received - t, c = $("rChange");
+  c.className = "change";
+  if(t === 0 && received === 0){ $("rLabel").textContent = "Return to customer"; $("rAmt").textContent = "0.00"; }
+  else if(diff >= 0){ $("rLabel").textContent = "Return to customer"; $("rAmt").textContent = CURRENCY + fmt(diff); c.classList.add("ok"); }
+  else { $("rLabel").textContent = "Still to collect"; $("rAmt").textContent = CURRENCY + fmt(-diff); c.classList.add("short"); }
+}
+
+$("clear").onclick = function(){ order = {}; received = 0; render(); };
+$("resetCash").onclick = function(){ received = 0; render(); };
+$("exact").onclick = function(){ received = total(); render(); };
+$("done").onclick = function(){ order = {}; received = 0; render(); };
+render();
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+</script>
+</body>
+</html>
